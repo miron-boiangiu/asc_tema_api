@@ -1,0 +1,49 @@
+#Task (for Threadpool, will be extended):
+run_task()
+
+#Threadpool (needs to be general):
+add_task(task)
+pop_task()
+
+
+#TaskRunner:
+continuously pop_task() and task.run_task()
+
+
+#Data ingestor:
+
+entry: a dict {}
+
+get_entries()
+check_entry_type(entry)
+
+
+#QueryHandler (uses Threadpool and Data ingestor):
+add_query
+get_query_status
+get_query_result
+check_query_finished
+
+
+#Query (data container):
+    queryType enum
+    queryData: dict
+    is_finished
+    set_finished()
+    get_finished()
+
+#Routes:
+
+for a new query:
+    new_query = query(query_type, query_data?)
+    self.queryhandler.add_query(new_query)
+    return {whatever}
+
+to check query status:
+    return {self.query_handler.get_status(query_no_1)}
+
+to get result:
+    if self.query_handler.check_query_finished(query_no_1):
+        return {self.query_handler.get_query_result(query_no_1)}
+    else
+        return {"query not done"}
