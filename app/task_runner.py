@@ -3,21 +3,31 @@ from queue import Queue, Empty
 from threading import Thread, Event
 
 
-class Task():
+class Task:
+
+    def __init__(self) -> None:
+        self._is_done_event = Event()
+        self._result = None
+
+    def is_done(self) -> bool:
+        return self._is_done_event.is_set()
+
+    def get_result(self):
+        return self._result
+    
+    def _done(self):
+        self._is_done_event.set()
+
     def run(self):
         pass
+
+    def start(self):
+        self._result = self.run()
+        self._done()
 
 
 class ThreadPool:
     def __init__(self):
-        # You must implement a ThreadPool of TaskRunners
-        # Your ThreadPool should check if an environment variable TP_NUM_OF_THREADS is defined
-        # If the env var is defined, that is the number of threads to be used by the thread pool
-        # Otherwise, you are to use what the hardware concurrency allows
-        # You are free to write your implementation as you see fit, but
-        # You must NOT:
-        #   * create more threads than the hardware concurrency allows
-        #   * recreate threads for each task
         self._tasks_queue: Queue = Queue()
         self._terminate_event = Event()
         self._workers: list[TaskRunner] = []
@@ -62,7 +72,7 @@ class TaskRunner(Thread):
         while True:
             try:
                 task_to_run = self._threadpool._pop_task()
-                task_to_run.run()
+                task_to_run.start()
             except Empty:
                 pass
 
