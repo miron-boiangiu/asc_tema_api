@@ -70,6 +70,27 @@ class BaseTask(Task):
             return 0
         
         return sum(map(lambda e: float(e["Data_Value"]), relevant_data)) / no_of_entries
+    
+    def _compute_state_mean_by_category(self, data: list[dict], question: str, state_location_desc: str) -> dict[str, float]:
+        relevant_data = list(filter(lambda e: e["Question"] == question and e["LocationDesc"] == state_location_desc, data))
+
+        category_values: dict[str, tuple[float, int]] = {}  # Maps a category to a tuple of the sum of its values and the number of values
+
+        for entry in relevant_data:
+            key = "('{}', '{}')".format(entry["StratificationCategory1"], entry["Stratification1"])  # This format is straight up retarded. Sometimes I wish I died at birth
+
+            if key in category_values:
+                prev_values = category_values[key]
+                category_values[key] = (prev_values[0] + float(entry["Data_Value"]), prev_values[1] + 1)
+            else:
+                category_values[key] = (float(entry["Data_Value"]), 1)
+
+        final_result = {}
+
+        for key, values_tuple in category_values.items():
+            final_result[key] = values_tuple[0] / values_tuple[1]
+
+        return final_result
 
 class Best5Task(BaseTask):
     def __init__(self, data_ingestor: DataIngestor, question: str) -> None:
@@ -181,4 +202,18 @@ class StateDiffFromMeanTask(BaseTask):
 
         return {
             self._state: global_average - state_average
+        }
+
+class StateMeanByCategory(BaseTask):
+    def __init__(self, data_ingestor: DataIngestor, question: str, state: str) -> None:
+        super().__init__()
+        self._question = question
+        self._data_ingestor = data_ingestor
+        self._state = state
+
+    def run(self):
+        all_data = self._data_ingestor.get_entries()
+
+        return {
+            self._state: self._compute_state_mean_by_category(all_data, self._question, self._state)
         }

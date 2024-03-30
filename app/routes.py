@@ -109,11 +109,13 @@ def mean_by_category_request():
 
 @queries_blueprint.route('/api/state_mean_by_category', methods=['POST'])
 def state_mean_by_category_request():
-    # TODO
-    # Get request data
-    # Register job. Don't wait for task to finish
-    # Increment job_id counter
-    # Return associated job_id
 
+    if "question" not in request.json:
+        return error_response(NO_QUESTION_REASON)
+    
+    if "state" not in request.json:
+        return error_response(NO_STATE_REASON)
 
-    return jsonify({"status": "NotImplemented"})
+    id = current_app.query_handler.handle_query("state_mean_by_category", request.json)
+
+    return job_id_response(id)
