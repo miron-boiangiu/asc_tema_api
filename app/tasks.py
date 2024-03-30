@@ -52,6 +52,17 @@ class BaseTask(Task):
             countries_averages.append((location, sum_no_tuple[0] / sum_no_tuple[1]))
 
         return countries_averages
+    
+    def _compute_state_mean(self, data_ingestor: DataIngestor, question: str, state_location_desc: str) -> float:
+        all_data = data_ingestor.get_entries()
+        relevant_data = list(filter(lambda e: e["Question"] == question and e["LocationDesc"] == state_location_desc, all_data))
+
+        no_of_entries = len(relevant_data)
+        
+        if no_of_entries == 0:
+            return 0
+        
+        return sum(map(lambda e: float(e["Data_Value"]), relevant_data)) / no_of_entries
 
 class Best5Task(BaseTask):
     def __init__(self, data_ingestor: DataIngestor, question: str) -> None:
@@ -103,3 +114,15 @@ class StatesMeanTask(BaseTask):
             final_result[result[0]] = result[1]
 
         return final_result
+
+class StateMeanTask(BaseTask):
+    def __init__(self, data_ingestor: DataIngestor, question: str, state: str) -> None:
+        super().__init__()
+        self._question = question
+        self._data_ingestor = data_ingestor
+        self._state = state
+
+    def run(self):
+        return {
+            self._state: self._compute_state_mean(self._data_ingestor, self._question, self._state)
+        }

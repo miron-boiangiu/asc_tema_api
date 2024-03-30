@@ -43,13 +43,16 @@ def states_mean_request():
 
 @queries_blueprint.route('/api/state_mean', methods=['POST'])
 def state_mean_request():
-    # TODO
-    # Get request data
-    # Register job. Don't wait for task to finish
-    # Increment job_id counter
-    # Return associated job_id
 
-    return jsonify({"status": "NotImplemented"})
+    if "question" not in request.json:
+        return error_response(NO_QUESTION_REASON)
+    
+    if "state" not in request.json:
+        return error_response(NO_STATE_REASON)
+
+    id = current_app.query_handler.handle_query("state_mean", request.json)
+
+    return job_id_response(id)
 
 @queries_blueprint.route('/api/worst5', methods=['POST'])
 def worst5_request():
