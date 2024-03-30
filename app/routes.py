@@ -1,5 +1,6 @@
 from flask import request, jsonify, Blueprint, current_app
 from app.query_handler import NonexistentQueryException
+from app.response_formats import error_response, data_response, running_response, job_id_response, INVALID_JOB_ID_REASON, NO_QUESTION_REASON
 
 import os
 import json
@@ -11,33 +12,22 @@ def get_response(job_id):
     
     try:
         if current_app.query_handler.is_query_finished(job_id):
-            return {
-                  "status": "done",
-                  "data": current_app.query_handler.get_query_result(job_id)
-            }
+            return data_response(current_app.query_handler.get_query_result(job_id))
         else:
-            return {
-                  "status": "running",
-            }
+            return running_response()
 
     except NonexistentQueryException:
-        return {
-            "status": "error",
-            "reason": "Invalid job_id",
-        }
+        return error_response(INVALID_JOB_ID_REASON)
 
 @queries_blueprint.route('/api/best5', methods=['POST'])
 def best5_request():
 
     if "question" not in request.json:
-        return {"status": "error",
-                "reason": "The request must include a question."}
+        return error_response(NO_QUESTION_REASON)
 
     id = current_app.query_handler.handle_query("best5", request.json)
 
-    return {
-        "job_id": f"job_id_{id}"
-    }
+    return job_id_response(id)
 
 @queries_blueprint.route('/api/states_mean', methods=['POST'])
 def states_mean_request():
