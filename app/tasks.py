@@ -166,3 +166,19 @@ class DiffFromMeanTask(BaseTask):
             final_result[result[0]] = global_average - result[1]
 
         return final_result
+    
+class StateDiffFromMeanTask(BaseTask):
+    def __init__(self, data_ingestor: DataIngestor, question: str, state: str) -> None:
+        super().__init__()
+        self._question = question
+        self._data_ingestor = data_ingestor
+        self._state = state
+
+    def run(self):
+        all_data = self._data_ingestor.get_entries()
+        global_average = self._compute_global_mean(all_data, self._question)
+        state_average = self._compute_state_mean(all_data, self._question, self._state)
+
+        return {
+            self._state: global_average - state_average
+        }

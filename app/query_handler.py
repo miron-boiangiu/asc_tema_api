@@ -2,7 +2,8 @@ from threading import Lock
 from app import ThreadPool
 from app import DataIngestor
 from app.task_runner import Task
-from app.tasks import Best5Task, Worst5Task, StatesMeanTask, StateMeanTask, GlobalMeanTask, DiffFromMeanTask
+from app.tasks import Best5Task, Worst5Task, StatesMeanTask, StateMeanTask,\
+    GlobalMeanTask, DiffFromMeanTask, StateDiffFromMeanTask
 
 
 class NonexistentQueryException(Exception):
@@ -19,6 +20,7 @@ class QueryHandler:
         "state_mean": StateMeanTask,
         "global_mean": GlobalMeanTask,
         "diff_from_mean": DiffFromMeanTask,
+        "state_diff_from_mean": StateDiffFromMeanTask,
     }
 
     def __init__(self, threadpool: ThreadPool, data_ingestor: DataIngestor) -> None:
