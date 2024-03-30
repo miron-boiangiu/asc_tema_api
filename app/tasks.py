@@ -22,12 +22,11 @@ class BaseTask(Task):
     def __init__(self) -> None:
         super().__init__()
 
-    def _compute_states_mean(self, data_ingestor: DataIngestor, question: str) -> list[tuple[str, float]]:
+    def _compute_states_mean(self, data: list[dict], question: str) -> list[tuple[str, float]]:
         """
         Returns a list of tuples, consisting of the country's LocationDesc and its mean.
         """
-        all_data = data_ingestor.get_entries()
-        relevant_data = filter(lambda e: e["Question"] == question, all_data)
+        relevant_data = filter(lambda e: e["Question"] == question, data)
 
         # Maps LocationDesc to a tuple consisting of the sum of values and the number of values from all entries
         countries_scores_dict: dict[str, tuple[int, int]] = {}  
@@ -53,9 +52,8 @@ class BaseTask(Task):
 
         return countries_averages
     
-    def _compute_state_mean(self, data_ingestor: DataIngestor, question: str, state_location_desc: str) -> float:
-        all_data = data_ingestor.get_entries()
-        relevant_data = list(filter(lambda e: e["Question"] == question and e["LocationDesc"] == state_location_desc, all_data))
+    def _compute_state_mean(self, data: list[dict], question: str, state_location_desc: str) -> float:
+        relevant_data = list(filter(lambda e: e["Question"] == question and e["LocationDesc"] == state_location_desc, data))
 
         no_of_entries = len(relevant_data)
         
@@ -71,7 +69,8 @@ class Best5Task(BaseTask):
         self._data_ingestor = data_ingestor
 
     def run(self):
-        countries_averages = self._compute_states_mean(self._data_ingestor, self._question)
+        all_data = self._data_ingestor.get_entries()
+        countries_averages = self._compute_states_mean(all_data, self._question)
         should_reverse = self._question in questions_best_is_max
         countries_averages.sort(key=lambda e: e[1], reverse=should_reverse)
 
@@ -88,7 +87,8 @@ class Worst5Task(BaseTask):
         self._data_ingestor = data_ingestor
 
     def run(self):
-        countries_averages = self._compute_states_mean(self._data_ingestor, self._question)
+        all_data = self._data_ingestor.get_entries()
+        countries_averages = self._compute_states_mean(all_data, self._question)
         should_reverse = self._question in questions_best_is_min
         countries_averages.sort(key=lambda e: e[1], reverse=should_reverse)
 
@@ -105,7 +105,8 @@ class StatesMeanTask(BaseTask):
         self._data_ingestor = data_ingestor
 
     def run(self):
-        countries_averages = self._compute_states_mean(self._data_ingestor, self._question)
+        all_data = self._data_ingestor.get_entries()
+        countries_averages = self._compute_states_mean(all_data, self._question)
 
         #  Who writes an API where what should be values are keys??
         #  This should look like this instead: [{name: Romania, value: 10}], not like this: {Romania: 10}...
@@ -123,6 +124,7 @@ class StateMeanTask(BaseTask):
         self._state = state
 
     def run(self):
+        all_data = self._data_ingestor.get_entries()
         return {
-            self._state: self._compute_state_mean(self._data_ingestor, self._question, self._state)
+            self._state: self._compute_state_mean(all_data, self._question, self._state)
         }
