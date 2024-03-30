@@ -1,4 +1,5 @@
 NO_QUESTION_REASON = "The request must include a question."
+NO_STATE_REASON = "The request must include a state."
 INVALID_JOB_ID_REASON = "Invalid job_id"
 
 def job_id_response(id):

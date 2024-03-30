@@ -1,9 +1,11 @@
-from flask import request, jsonify, Blueprint, current_app
-from app.query_handler import NonexistentQueryException
-from app.response_formats import error_response, data_response, running_response, job_id_response, INVALID_JOB_ID_REASON, NO_QUESTION_REASON
-
 import os
 import json
+
+from flask import request, jsonify, Blueprint, current_app
+from app.query_handler import NonexistentQueryException
+from app.response_formats import error_response, data_response, running_response, job_id_response,\
+    INVALID_JOB_ID_REASON, NO_QUESTION_REASON, NO_STATE_REASON
+
 
 queries_blueprint = Blueprint('queries', __name__)
 
@@ -56,13 +58,13 @@ def state_mean_request():
 
 @queries_blueprint.route('/api/worst5', methods=['POST'])
 def worst5_request():
-    # TODO
-    # Get request data
-    # Register job. Don't wait for task to finish
-    # Increment job_id counter
-    # Return associated job_id
 
-    return jsonify({"status": "NotImplemented"})
+    if "question" not in request.json:
+        return error_response(NO_QUESTION_REASON)
+
+    id = current_app.query_handler.handle_query("worst5", request.json)
+
+    return job_id_response(id)
 
 @queries_blueprint.route('/api/global_mean', methods=['POST'])
 def global_mean_request():

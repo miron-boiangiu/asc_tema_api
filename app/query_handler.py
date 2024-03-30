@@ -2,7 +2,7 @@ from threading import Lock
 from app import ThreadPool
 from app import DataIngestor
 from app.task_runner import Task
-from app.tasks import Best5Task
+from app.tasks import Best5Task, Worst5Task
 
 
 class NonexistentQueryException(Exception):
@@ -14,6 +14,7 @@ class QueryHandler:
 
     query_to_task_translator = {
         "best5": Best5Task,
+        "worst5": Worst5Task,
     }
 
     def __init__(self, threadpool: ThreadPool, data_ingestor: DataIngestor) -> None:
