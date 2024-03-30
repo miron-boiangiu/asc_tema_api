@@ -70,7 +70,7 @@ class Best5Task(BaseTask):
 
         return final_result
 
-class Worst5Task(Task):
+class Worst5Task(BaseTask):
     def __init__(self, data_ingestor: DataIngestor, question: str) -> None:
         super().__init__()
         self._question = question
@@ -83,6 +83,23 @@ class Worst5Task(Task):
 
         final_result = {}
         for result in countries_averages[:5]:
+            final_result[result[0]] = result[1]
+
+        return final_result
+
+class StatesMeanTask(BaseTask):
+    def __init__(self, data_ingestor: DataIngestor, question: str) -> None:
+        super().__init__()
+        self._question = question
+        self._data_ingestor = data_ingestor
+
+    def run(self):
+        countries_averages = self._compute_states_mean(self._data_ingestor, self._question)
+
+        #  Who writes an API where what should be values are keys??
+        #  This should look like this instead: [{name: Romania, value: 10}], not like this: {Romania: 10}...
+        final_result = {}
+        for result in countries_averages:
             final_result[result[0]] = result[1]
 
         return final_result
