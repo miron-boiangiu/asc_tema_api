@@ -61,6 +61,16 @@ class BaseTask(Task):
             return 0
         
         return sum(map(lambda e: float(e["Data_Value"]), relevant_data)) / no_of_entries
+    
+    def _compute_global_mean(self, data: list[dict], question: str) -> float:
+        relevant_data = list(filter(lambda e: e["Question"] == question, data))
+        no_of_entries = len(relevant_data)
+
+        if no_of_entries == 0:
+            return 0
+        
+        return sum(map(lambda e: float(e["Data_Value"]), relevant_data)) / no_of_entries
+        
 
 class Best5Task(BaseTask):
     def __init__(self, data_ingestor: DataIngestor, question: str) -> None:
@@ -127,4 +137,16 @@ class StateMeanTask(BaseTask):
         all_data = self._data_ingestor.get_entries()
         return {
             self._state: self._compute_state_mean(all_data, self._question, self._state)
+        }
+    
+class GlobalMeanTask(BaseTask):
+    def __init__(self, data_ingestor: DataIngestor, question: str) -> None:
+        super().__init__()
+        self._question = question
+        self._data_ingestor = data_ingestor
+
+    def run(self):
+        all_data = self._data_ingestor.get_entries()
+        return {
+            "global_mean": self._compute_global_mean(all_data, self._question)
         }
