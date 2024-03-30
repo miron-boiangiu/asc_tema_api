@@ -70,7 +70,6 @@ class BaseTask(Task):
             return 0
         
         return sum(map(lambda e: float(e["Data_Value"]), relevant_data)) / no_of_entries
-        
 
 class Best5Task(BaseTask):
     def __init__(self, data_ingestor: DataIngestor, question: str) -> None:
@@ -138,7 +137,7 @@ class StateMeanTask(BaseTask):
         return {
             self._state: self._compute_state_mean(all_data, self._question, self._state)
         }
-    
+
 class GlobalMeanTask(BaseTask):
     def __init__(self, data_ingestor: DataIngestor, question: str) -> None:
         super().__init__()
@@ -150,3 +149,20 @@ class GlobalMeanTask(BaseTask):
         return {
             "global_mean": self._compute_global_mean(all_data, self._question)
         }
+
+class DiffFromMeanTask(BaseTask):
+    def __init__(self, data_ingestor: DataIngestor, question: str) -> None:
+        super().__init__()
+        self._question = question
+        self._data_ingestor = data_ingestor
+
+    def run(self):
+        all_data = self._data_ingestor.get_entries()
+        global_average = self._compute_global_mean(all_data, self._question)
+        countries_averages = self._compute_states_mean(all_data, self._question)
+
+        final_result = {}
+        for result in countries_averages:
+            final_result[result[0]] = global_average - result[1]
+
+        return final_result
