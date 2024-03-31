@@ -63,5 +63,14 @@ class QueryHandler:
 
         return self._tasks[query_id].get_result()
     
+    def unfinished_tasks_count(self):
+        unfinished_tasks_no = 0
+
+        for task_no, task in self._tasks.items():
+            if not task.is_done():
+                unfinished_tasks_no += 1
+    
+        return unfinished_tasks_no
+
     def terminate(self):
         self._threadpool.terminate()

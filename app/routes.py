@@ -9,6 +9,11 @@ from app.response_formats import error_response, data_response, running_response
 
 queries_blueprint = Blueprint('queries', __name__)
 
+@queries_blueprint.route('/api/num_jobs', methods=['GET'])
+def num_jobs():
+
+    return data_response(current_app.query_handler.unfinished_tasks_count())
+
 @queries_blueprint.route('/api/get_results/<job_id>', methods=['GET'])
 def get_response(job_id):
     
