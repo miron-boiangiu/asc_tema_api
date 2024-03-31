@@ -2,12 +2,18 @@ import os
 import json
 
 from flask import request, jsonify, Blueprint, current_app
-from app.query_handler import NonexistentQueryException
+from app.query_handler import NonexistentQueryException, HandlerTerminatedException
 from app.response_formats import error_response, data_response, running_response, job_id_response,\
-    INVALID_JOB_ID_REASON, NO_QUESTION_REASON, NO_STATE_REASON
+    INVALID_JOB_ID_REASON, NO_QUESTION_REASON, NO_STATE_REASON, HANDLER_TERMINATED_EXCEPTION
 
 
 queries_blueprint = Blueprint('queries', __name__)
+
+@queries_blueprint.route('/api/graceful_shutdown', methods=['GET'])
+def shutdown_request():
+
+    current_app.query_handler.terminate()
+    return data_response("terminated")
 
 @queries_blueprint.route('/api/jobs', methods=['GET'])
 def jobs_request():
@@ -37,7 +43,10 @@ def best5_request():
     if "question" not in request.json:
         return error_response(NO_QUESTION_REASON)
 
-    id = current_app.query_handler.handle_query("best5", request.json)
+    try:
+        id = current_app.query_handler.handle_query("best5", request.json)
+    except HandlerTerminatedException:
+        return error_response(HANDLER_TERMINATED_EXCEPTION)
 
     return job_id_response(id)
 
@@ -47,7 +56,10 @@ def states_mean_request():
     if "question" not in request.json:
         return error_response(NO_QUESTION_REASON)
 
-    id = current_app.query_handler.handle_query("states_mean", request.json)
+    try:
+        id = current_app.query_handler.handle_query("states_mean", request.json)
+    except HandlerTerminatedException:
+        return error_response(HANDLER_TERMINATED_EXCEPTION)
 
     return job_id_response(id)
 
@@ -60,7 +72,10 @@ def state_mean_request():
     if "state" not in request.json:
         return error_response(NO_STATE_REASON)
 
-    id = current_app.query_handler.handle_query("state_mean", request.json)
+    try:
+        id = current_app.query_handler.handle_query("state_mean", request.json)
+    except HandlerTerminatedException:
+        return error_response(HANDLER_TERMINATED_EXCEPTION)
 
     return job_id_response(id)
 
@@ -70,7 +85,10 @@ def worst5_request():
     if "question" not in request.json:
         return error_response(NO_QUESTION_REASON)
 
-    id = current_app.query_handler.handle_query("worst5", request.json)
+    try:
+        id = current_app.query_handler.handle_query("worst5", request.json)
+    except HandlerTerminatedException:
+        return error_response(HANDLER_TERMINATED_EXCEPTION)
 
     return job_id_response(id)
 
@@ -80,7 +98,10 @@ def global_mean_request():
     if "question" not in request.json:
         return error_response(NO_QUESTION_REASON)
 
-    id = current_app.query_handler.handle_query("global_mean", request.json)
+    try:
+        id = current_app.query_handler.handle_query("global_mean", request.json)
+    except HandlerTerminatedException:
+        return error_response(HANDLER_TERMINATED_EXCEPTION)
 
     return job_id_response(id)
 
@@ -90,7 +111,10 @@ def diff_from_mean_request():
     if "question" not in request.json:
         return error_response(NO_QUESTION_REASON)
 
-    id = current_app.query_handler.handle_query("diff_from_mean", request.json)
+    try:
+        id = current_app.query_handler.handle_query("diff_from_mean", request.json)
+    except HandlerTerminatedException:
+        return error_response(HANDLER_TERMINATED_EXCEPTION)
 
     return job_id_response(id)
 
@@ -103,7 +127,10 @@ def state_diff_from_mean_request():
     if "state" not in request.json:
         return error_response(NO_STATE_REASON)
 
-    id = current_app.query_handler.handle_query("state_diff_from_mean", request.json)
+    try:
+        id = current_app.query_handler.handle_query("state_diff_from_mean", request.json)
+    except HandlerTerminatedException:
+        return error_response(HANDLER_TERMINATED_EXCEPTION)
 
     return job_id_response(id)
 
@@ -113,7 +140,10 @@ def mean_by_category_request():
     if "question" not in request.json:
         return error_response(NO_QUESTION_REASON)
 
-    id = current_app.query_handler.handle_query("mean_by_category", request.json)
+    try:
+        id = current_app.query_handler.handle_query("mean_by_category", request.json)
+    except HandlerTerminatedException:
+        return error_response(HANDLER_TERMINATED_EXCEPTION)
 
     return job_id_response(id)
 
@@ -126,6 +156,9 @@ def state_mean_by_category_request():
     if "state" not in request.json:
         return error_response(NO_STATE_REASON)
 
-    id = current_app.query_handler.handle_query("state_mean_by_category", request.json)
+    try:
+        id = current_app.query_handler.handle_query("state_mean_by_category", request.json)
+    except HandlerTerminatedException:
+        return error_response(HANDLER_TERMINATED_EXCEPTION)
 
     return job_id_response(id)

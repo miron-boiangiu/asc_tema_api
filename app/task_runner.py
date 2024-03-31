@@ -53,12 +53,21 @@ class ThreadPool:
     def _pop_task(self) -> Task:
         return self._tasks_queue.get(block=False)
     
+    def tasks_left(self) -> int:
+        return self._tasks_queue.qsize()
+
     def _is_terminated(self) -> bool:
         return self._terminate_event.is_set()
 
     def terminate(self) -> None:
+        """
+        Finishes given tasks and terminates.
+        """
         self._terminate_event.set()
-        for worker in self._workers:
+
+        # Should we really join them here? They terminate once no more
+        # tasks are left anyway, which can be queried by users.
+        for worker in self._workers: 
             worker.join()
 
 
@@ -76,5 +85,5 @@ class TaskRunner(Thread):
             except Empty:
                 pass
 
-            if self._threadpool._is_terminated():
+            if self._threadpool._is_terminated() and self._threadpool.tasks_left() == 0:
                 break

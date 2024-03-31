@@ -1,4 +1,4 @@
-from threading import Lock
+from threading import Lock, Event
 from app import ThreadPool
 from app import DataIngestor
 from app.task_runner import Task
@@ -11,6 +11,9 @@ class NonexistentQueryException(Exception):
     def __init__(self):            
         super().__init__()
 
+class HandlerTerminatedException(Exception):
+    def __init__(self):            
+        super().__init__()
 
 class QueryHandler:
 
@@ -32,9 +35,13 @@ class QueryHandler:
         self._tasks: dict[int, Task] = {}
         self._next_assignable_task_no = 1
         self._mutex = Lock()
+        self._terminated = Event()
 
     def handle_query(self, query: str, request_json: dict):
         
+        if self._terminated.is_set():
+            raise HandlerTerminatedException()
+
         new_task = QueryHandler.query_to_task_translator[query](self._data_ingestor, **request_json)
         self._threadpool.push_task(new_task)
         self._tasks[self._next_assignable_task_no] = new_task
@@ -83,4 +90,8 @@ class QueryHandler:
         return unfinished_tasks_no
 
     def terminate(self):
+        #  We stop accepting new requests
+        self._terminated.set()
+
+        # We tell the threadpool to finish work and terminate.
         self._threadpool.terminate()
