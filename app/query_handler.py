@@ -1,3 +1,4 @@
+import os
 from threading import Lock, Event
 from app import ThreadPool
 from app import DataIngestor
@@ -29,24 +30,29 @@ class QueryHandler:
         "mean_by_category": MeanByCategory,
     }
 
-    def __init__(self, threadpool: ThreadPool, data_ingestor: DataIngestor) -> None:
+    def __init__(self, threadpool: ThreadPool, data_ingestor: DataIngestor, output_folder = None) -> None:
         self._threadpool = threadpool
         self._data_ingestor = data_ingestor
         self._tasks: dict[int, Task] = {}
         self._next_assignable_task_no = 1
         self._mutex = Lock()
         self._terminated = Event()
+        self._output_folder = output_folder
 
     def handle_query(self, query: str, request_json: dict):
         
         if self._terminated.is_set():
             raise HandlerTerminatedException()
 
-        new_task = QueryHandler.query_to_task_translator[query](self._data_ingestor, **request_json)
-        self._threadpool.push_task(new_task)
-        self._tasks[self._next_assignable_task_no] = new_task
-
         with self._mutex:
+            
+            file_name = f"job_id_{self._next_assignable_task_no}"
+            output_path = os.path.join(self._output_folder, file_name)
+
+            new_task = QueryHandler.query_to_task_translator[query](self._data_ingestor, output_path=output_path, **request_json)
+            self._threadpool.push_task(new_task)
+            self._tasks[self._next_assignable_task_no] = new_task
+
             id = self._next_assignable_task_no
             self._next_assignable_task_no += 1
 

@@ -1,3 +1,4 @@
+import json
 from app import DataIngestor
 from app.task_runner import Task
 
@@ -19,8 +20,16 @@ questions_best_is_max: list[str] = [
 
 
 class BaseTask(Task):
-    def __init__(self) -> None:
+    def __init__(self, output_path = None) -> None:
         super().__init__()
+        self._output_path = output_path
+
+    def after_running(self):
+        if self._output_path is None:
+            return
+
+        with open(self._output_path, "w") as f:
+            f.write(json.dumps(self.get_result()))
 
     def _compute_states_mean(self, data: list[dict], question: str) -> list[tuple[str, float]]:
         """
@@ -135,8 +144,8 @@ class BaseTask(Task):
         return category_values
 
 class Best5Task(BaseTask):
-    def __init__(self, data_ingestor: DataIngestor, question: str) -> None:
-        super().__init__()
+    def __init__(self, data_ingestor: DataIngestor, question: str, output_path = None) -> None:
+        super().__init__(output_path)
         self._question = question
         self._data_ingestor = data_ingestor
 
@@ -153,8 +162,8 @@ class Best5Task(BaseTask):
         return final_result
 
 class Worst5Task(BaseTask):
-    def __init__(self, data_ingestor: DataIngestor, question: str) -> None:
-        super().__init__()
+    def __init__(self, data_ingestor: DataIngestor, question: str, output_path = None) -> None:
+        super().__init__(output_path)
         self._question = question
         self._data_ingestor = data_ingestor
 
@@ -171,8 +180,8 @@ class Worst5Task(BaseTask):
         return final_result
 
 class StatesMeanTask(BaseTask):
-    def __init__(self, data_ingestor: DataIngestor, question: str) -> None:
-        super().__init__()
+    def __init__(self, data_ingestor: DataIngestor, question: str, output_path = None) -> None:
+        super().__init__(output_path)
         self._question = question
         self._data_ingestor = data_ingestor
 
@@ -189,8 +198,8 @@ class StatesMeanTask(BaseTask):
         return final_result
 
 class StateMeanTask(BaseTask):
-    def __init__(self, data_ingestor: DataIngestor, question: str, state: str) -> None:
-        super().__init__()
+    def __init__(self, data_ingestor: DataIngestor, question: str, state: str, output_path = None) -> None:
+        super().__init__(output_path)
         self._question = question
         self._data_ingestor = data_ingestor
         self._state = state
@@ -202,8 +211,8 @@ class StateMeanTask(BaseTask):
         }
 
 class GlobalMeanTask(BaseTask):
-    def __init__(self, data_ingestor: DataIngestor, question: str) -> None:
-        super().__init__()
+    def __init__(self, data_ingestor: DataIngestor, question: str, output_path = None) -> None:
+        super().__init__(output_path)
         self._question = question
         self._data_ingestor = data_ingestor
 
@@ -214,8 +223,8 @@ class GlobalMeanTask(BaseTask):
         }
 
 class DiffFromMeanTask(BaseTask):
-    def __init__(self, data_ingestor: DataIngestor, question: str) -> None:
-        super().__init__()
+    def __init__(self, data_ingestor: DataIngestor, question: str, output_path = None) -> None:
+        super().__init__(output_path)
         self._question = question
         self._data_ingestor = data_ingestor
 
@@ -231,8 +240,8 @@ class DiffFromMeanTask(BaseTask):
         return final_result
     
 class StateDiffFromMeanTask(BaseTask):
-    def __init__(self, data_ingestor: DataIngestor, question: str, state: str) -> None:
-        super().__init__()
+    def __init__(self, data_ingestor: DataIngestor, question: str, state: str, output_path = None) -> None:
+        super().__init__(output_path)
         self._question = question
         self._data_ingestor = data_ingestor
         self._state = state
@@ -247,8 +256,8 @@ class StateDiffFromMeanTask(BaseTask):
         }
 
 class StateMeanByCategory(BaseTask):
-    def __init__(self, data_ingestor: DataIngestor, question: str, state: str) -> None:
-        super().__init__()
+    def __init__(self, data_ingestor: DataIngestor, question: str, state: str, output_path = None) -> None:
+        super().__init__(output_path)
         self._question = question
         self._data_ingestor = data_ingestor
         self._state = state
@@ -261,8 +270,8 @@ class StateMeanByCategory(BaseTask):
         }
     
 class MeanByCategory(BaseTask):
-    def __init__(self, data_ingestor: DataIngestor, question: str) -> None:
-        super().__init__()
+    def __init__(self, data_ingestor: DataIngestor, question: str, output_path = None) -> None:
+        super().__init__(output_path)
         self._question = question
         self._data_ingestor = data_ingestor
 

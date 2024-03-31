@@ -21,8 +21,12 @@ class Task:
     def run(self):
         pass
 
+    def after_running(self):
+        pass
+
     def start(self):
         self._result = self.run()
+        self.after_running()
         self._done()
 
 
