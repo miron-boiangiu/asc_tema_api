@@ -92,6 +92,39 @@ class BaseTask(Task):
 
         return final_result
 
+    def _compute_states_mean_by_category(self, data: list[dict], question: str) -> dict[str, float]:
+        """
+        Returns a dictionary of this shape: {LocationDesc: {StratificationCategory1: {Stratification1: Value}}
+        """
+        relevant_data = list(filter(lambda e: e["Question"] == question, data))
+
+        category_values: dict[str, dict[str, (float, int)]] = {}  # {LocationDesc: {StratificationCategory1: {Stratification1: (SUM, NO_OF_VALUES)}}
+
+        for entry in relevant_data:
+            location = entry["LocationDesc"]
+            stratification_category = entry["StratificationCategory1"]
+            stratification = entry["Stratification1"]
+
+            if location in category_values:
+                if stratification_category in category_values[location]:
+                    if stratification in category_values[location][stratification_category]:
+                        prev_values = category_values[location][stratification_category][stratification]
+                        category_values[location][stratification_category][stratification] = (prev_values[0] + float(entry["Data_Value"]), prev_values[1] + 1)
+                    else:
+                        category_values[location][stratification_category][stratification] = (float(entry["Data_Value"]), 1)
+                else:
+                    category_values[location][stratification_category] = {stratification: (float(entry["Data_Value"]), 1)}
+            else:
+                category_values[location] = {stratification_category: {stratification: (float(entry["Data_Value"]), 1)}}
+
+        for location in category_values:
+            for stratification_category in category_values[location]:
+                for stratification in category_values[location][stratification_category]:
+                    values = category_values[location][stratification_category][stratification] 
+                    category_values[location][stratification_category][stratification] = values[0] / values[1]
+
+        return category_values
+
 class Best5Task(BaseTask):
     def __init__(self, data_ingestor: DataIngestor, question: str) -> None:
         super().__init__()
@@ -217,3 +250,24 @@ class StateMeanByCategory(BaseTask):
         return {
             self._state: self._compute_state_mean_by_category(all_data, self._question, self._state)
         }
+    
+class MeanByCategory(BaseTask):
+    def __init__(self, data_ingestor: DataIngestor, question: str) -> None:
+        super().__init__()
+        self._question = question
+        self._data_ingestor = data_ingestor
+
+    def run(self):
+        all_data = self._data_ingestor.get_entries()
+
+        mean_by_category_dict = self._compute_states_mean_by_category(all_data, self._question)
+
+        final_result = {}
+
+        for location in mean_by_category_dict:
+            for stratification_category in mean_by_category_dict[location]:
+                for stratification, value in mean_by_category_dict[location][stratification_category].items():
+                    key = "('{}', '{}', '{}')".format(location, stratification_category, stratification)
+                    final_result[key] = value
+
+        return final_result
