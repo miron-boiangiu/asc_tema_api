@@ -9,13 +9,18 @@ from app.response_formats import error_response, data_response, running_response
 
 queries_blueprint = Blueprint('queries', __name__)
 
-@queries_blueprint.route('/api/num_jobs', methods=['GET'])
-def num_jobs():
+@queries_blueprint.route('/api/jobs', methods=['GET'])
+def jobs_request():
 
-    return data_response(current_app.query_handler.unfinished_tasks_count())
+    return data_response(current_app.query_handler.all_queries_status())
+
+@queries_blueprint.route('/api/num_jobs', methods=['GET'])
+def num_jobs_request():
+
+    return data_response(current_app.query_handler.unfinished_query_count())
 
 @queries_blueprint.route('/api/get_results/<job_id>', methods=['GET'])
-def get_response(job_id):
+def get_results_request(job_id):
     
     try:
         if current_app.query_handler.is_query_finished(job_id):

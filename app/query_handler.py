@@ -63,7 +63,17 @@ class QueryHandler:
 
         return self._tasks[query_id].get_result()
     
-    def unfinished_tasks_count(self):
+    def all_queries_status(self) -> list[dict[str: str]]:
+        result = []
+
+        for task_no, task in self._tasks.items():
+            status = "done" if task.is_done else "running"
+            key = f"job_id_{task_no}"
+            result.append({key: status})
+
+        return result
+
+    def unfinished_query_count(self) -> int:
         unfinished_tasks_no = 0
 
         for task_no, task in self._tasks.items():
