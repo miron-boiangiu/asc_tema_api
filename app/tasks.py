@@ -77,7 +77,13 @@ class BaseTask(Task):
         category_values: dict[str, tuple[float, int]] = {}  # Maps a category to a tuple of the sum of its values and the number of values
 
         for entry in relevant_data:
-            key = "('{}', '{}')".format(entry["StratificationCategory1"], entry["Stratification1"])  # This format is straight up retarded. Sometimes I wish I died at birth
+            category = entry["StratificationCategory1"]
+            stratification = entry["Stratification1"]
+            
+            if category == "" or stratification == "":
+                continue
+
+            key = "('{}', '{}')".format(category, stratification)  # This format is straight up retarded. Sometimes I wish I died at birth
 
             if key in category_values:
                 prev_values = category_values[key]
@@ -104,6 +110,9 @@ class BaseTask(Task):
             location = entry["LocationDesc"]
             stratification_category = entry["StratificationCategory1"]
             stratification = entry["Stratification1"]
+
+            if stratification == "" or stratification_category == "":
+                continue
 
             if location in category_values:
                 if stratification_category in category_values[location]:

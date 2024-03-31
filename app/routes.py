@@ -25,7 +25,7 @@ def num_jobs_request():
 
     return data_response(current_app.query_handler.unfinished_query_count())
 
-@queries_blueprint.route('/api/get_results/<job_id>', methods=['GET'])
+@queries_blueprint.route('/api/get_results/job_id_<job_id>', methods=['GET'])
 def get_results_request(job_id):
     
     try:
