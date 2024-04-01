@@ -89,9 +89,9 @@ def particular_state_question_request():
 
 @queries_blueprint.before_request
 def before_query():
-    current_app.persistent_logger.error(LOGGER_CALL_STARTED, request.path)
+    current_app.persistent_logger.info(LOGGER_CALL_STARTED, request.path)
 
 @queries_blueprint.after_request
 def after_query(response):
-    current_app.persistent_logger.error(LOGGER_CALL_ENDED)
+    current_app.persistent_logger.info(LOGGER_CALL_ENDED)
     return response
