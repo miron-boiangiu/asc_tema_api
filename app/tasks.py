@@ -29,7 +29,18 @@ class BaseTask(Task):
             return
 
         with open(self._output_path, "w", encoding="utf-8") as f:
-            f.write(json.dumps(self.get_result()))
+            f.write(json.dumps(self._result))
+            self._result = None
+
+    def get_result(self):
+        if self._output_path is None:
+            return self._result
+
+        file = open(self._output_path, "r", encoding="utf-8")
+        data = json.load(file)
+        file.close()
+
+        return data
 
     def _compute_states_mean(self, data, question: str):
         """
