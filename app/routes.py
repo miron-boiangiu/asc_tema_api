@@ -42,7 +42,7 @@ def get_results_request(job_id):
 
     except NonexistentQueryException:
         current_app.persistent_logger.error(LOGGER_NONEXISTENT_QUERY_ERROR)
-        return error_response(INVALID_JOB_ID_REASON)
+        return error_response(INVALID_JOB_ID_REASON), 404
 
 # If you change a route, also change it in query_handler.py's query_to_task_translator!
 @queries_blueprint.route('/api/best5', methods=['POST'])
@@ -55,7 +55,7 @@ def general_question_request():
 
     if "question" not in request.json:
         current_app.persistent_logger.error(LOGGER_REQUEST_MISSING_FIELD, "question")
-        return error_response(NO_QUESTION_REASON)
+        return error_response(NO_QUESTION_REASON), 400
 
     type_of_request = request.path.split("/")[-1]
 
@@ -63,7 +63,7 @@ def general_question_request():
         job_id = current_app.query_handler.handle_query(type_of_request, request.json)
     except HandlerTerminatedException:
         current_app.persistent_logger.error(LOGGER_HANDLER_TERMINATED_ERROR)
-        return error_response(HANDLER_TERMINATED_EXCEPTION)
+        return error_response(HANDLER_TERMINATED_EXCEPTION), 409
 
     return job_id_response(job_id)
 
@@ -75,11 +75,11 @@ def particular_state_question_request():
 
     if "question" not in request.json:
         current_app.persistent_logger.error(LOGGER_REQUEST_MISSING_FIELD, "question")
-        return error_response(NO_QUESTION_REASON)
+        return error_response(NO_QUESTION_REASON), 400
 
     if "state" not in request.json:
         current_app.persistent_logger.error(LOGGER_REQUEST_MISSING_FIELD, "state")
-        return error_response(NO_STATE_REASON)
+        return error_response(NO_STATE_REASON), 400
 
     type_of_request = request.path.split("/")[-1]
 
@@ -87,7 +87,7 @@ def particular_state_question_request():
         job_id = current_app.query_handler.handle_query(type_of_request, request.json)
     except HandlerTerminatedException:
         current_app.persistent_logger.error(LOGGER_HANDLER_TERMINATED_ERROR)
-        return error_response(HANDLER_TERMINATED_EXCEPTION)
+        return error_response(HANDLER_TERMINATED_EXCEPTION), 409
 
     return job_id_response(job_id)
 
