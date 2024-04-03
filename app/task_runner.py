@@ -54,7 +54,7 @@ class ThreadPool:
         number_of_threads = 0
 
         if "TP_NUM_OF_THREADS" in os.environ:
-            number_of_threads = os.getenv("TP_NUM_OF_THREADS")
+            number_of_threads = int(os.getenv("TP_NUM_OF_THREADS"))
         else:
             number_of_threads = os.cpu_count()
 
