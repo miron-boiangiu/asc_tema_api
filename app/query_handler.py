@@ -8,7 +8,7 @@ from threading import Lock, Event
 from app import ThreadPool
 from app import DataIngestor
 from app.tasks import Best5Task, Worst5Task, StatesMeanTask, StateMeanTask,\
-    GlobalMeanTask, DiffFromMeanTask, StateDiffFromMeanTask, StateMeanByCategory, \
+    GlobalMeanTask, DiffFromMeanTask, StateDiffFromMeanTask, StateMeanByCategory,\
     MeanByCategory
 
 
@@ -62,7 +62,11 @@ class QueryHandler:
         with self._mutex:
 
             file_name = f"job_id_{self._next_assignable_task_no}"
-            output_path = os.path.join(self._output_folder, file_name)
+
+            if self._output_folder:
+                output_path = os.path.join(self._output_folder, file_name)
+            else:
+                output_path = None
 
             new_task = QueryHandler.query_to_task_translator[query](self._data_ingestor,
                                                                     output_path=output_path,

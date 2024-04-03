@@ -8,7 +8,7 @@ questions_best_is_min = [
     'Percent of adults aged 18 years and older who have obesity',
     'Percent of adults who engage in no leisure-time physical activity',
     'Percent of adults who report consuming fruit less than one time daily',
-    'Percent of adults who report consuming vegetables less than one time daily'
+    'Percent of adults who report consuming vegetables less than one time daily',
 ]
 
 questions_best_is_max = [
