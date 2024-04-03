@@ -5,7 +5,7 @@ class DataIngestorTest(unittest.TestCase):
 
     def setUp(self) -> None:
         self.data_ingestor = DataIngestor('./unittests/test_data.csv')
-    
+
     def test_when_instantiated_then_data_is_read(self) -> None:
         read_entries = self.data_ingestor.get_entries()
 

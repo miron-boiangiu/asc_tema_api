@@ -1,3 +1,8 @@
+"""
+API for receiving data on sports statistics throughout the USA.
+"""
+
+
 import os
 import time
 import logging
@@ -17,7 +22,10 @@ LOGGING_FILESIZE = 204800  # 200 kB
 LOGGING_BACKUP_COUNT = 5
 LOGGING_FILENAME = 'webserver.log'
 
-def create_app(test_config=None, debug=False):
+def create_app():
+    """
+    The Flask application factory.
+    """
 
     webserver = Flask(__name__)
 
@@ -26,7 +34,11 @@ def create_app(test_config=None, debug=False):
     formatter = logging.Formatter(LOGGING_OUTPUT_FORMAT)
     formatter.converter = time.gmtime
 
-    file_handler = logging.handlers.RotatingFileHandler(LOGGING_FILENAME, "a", LOGGING_FILESIZE, LOGGING_BACKUP_COUNT, "utf-8")
+    file_handler = logging.handlers.RotatingFileHandler(LOGGING_FILENAME,
+                                                        "a",
+                                                        LOGGING_FILESIZE,
+                                                        LOGGING_BACKUP_COUNT,
+                                                        "utf-8")
     file_handler.setFormatter(formatter)
     file_handler.setLevel(logging.INFO)
 

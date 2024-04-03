@@ -1,11 +1,15 @@
-import os
-import json
+"""
+All routes for the data processing API.
+"""
 
-from flask import request, jsonify, Blueprint, current_app
+
+from flask import request, Blueprint, current_app
 from app.query_handler import NonexistentQueryException, HandlerTerminatedException
 from app.response_formats import error_response, data_response, running_response, job_id_response,\
     INVALID_JOB_ID_REASON, NO_QUESTION_REASON, NO_STATE_REASON, HANDLER_TERMINATED_EXCEPTION
-from app.logger_strings import *
+from app.logger_strings import LOGGER_SHUTTING_DOWN, LOGGER_NONEXISTENT_QUERY_ERROR,\
+    LOGGER_REQUEST_MISSING_FIELD, LOGGER_HANDLER_TERMINATED_ERROR, LOGGER_CALL_STARTED,\
+    LOGGER_CALL_ENDED
 
 
 queries_blueprint = Blueprint('queries', __name__)
@@ -29,12 +33,12 @@ def num_jobs_request():
 
 @queries_blueprint.route('/api/get_results/job_id_<job_id>', methods=['GET'])
 def get_results_request(job_id):
-    
+
     try:
         if current_app.query_handler.is_query_finished(job_id):
             return data_response(current_app.query_handler.get_query_result(job_id))
-        else:
-            return running_response()
+
+        return running_response()
 
     except NonexistentQueryException:
         current_app.persistent_logger.error(LOGGER_NONEXISTENT_QUERY_ERROR)
@@ -56,12 +60,12 @@ def general_question_request():
     type_of_request = request.path.split("/")[-1]
 
     try:
-        id = current_app.query_handler.handle_query(type_of_request, request.json)
+        job_id = current_app.query_handler.handle_query(type_of_request, request.json)
     except HandlerTerminatedException:
         current_app.persistent_logger.error(LOGGER_HANDLER_TERMINATED_ERROR)
         return error_response(HANDLER_TERMINATED_EXCEPTION)
 
-    return job_id_response(id)
+    return job_id_response(job_id)
 
 # If you change a route, also change it in query_handler.py's query_to_task_translator!
 @queries_blueprint.route('/api/state_mean', methods=['POST'])
@@ -72,7 +76,7 @@ def particular_state_question_request():
     if "question" not in request.json:
         current_app.persistent_logger.error(LOGGER_REQUEST_MISSING_FIELD, "question")
         return error_response(NO_QUESTION_REASON)
-    
+
     if "state" not in request.json:
         current_app.persistent_logger.error(LOGGER_REQUEST_MISSING_FIELD, "state")
         return error_response(NO_STATE_REASON)
@@ -80,12 +84,12 @@ def particular_state_question_request():
     type_of_request = request.path.split("/")[-1]
 
     try:
-        id = current_app.query_handler.handle_query(type_of_request, request.json)
+        job_id = current_app.query_handler.handle_query(type_of_request, request.json)
     except HandlerTerminatedException:
         current_app.persistent_logger.error(LOGGER_HANDLER_TERMINATED_ERROR)
         return error_response(HANDLER_TERMINATED_EXCEPTION)
 
-    return job_id_response(id)
+    return job_id_response(job_id)
 
 @queries_blueprint.before_request
 def before_query():

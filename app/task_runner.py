@@ -1,9 +1,17 @@
+"""
+Generic ThreadPool for solving tasks.
+"""
+
+
 import os
 from queue import Queue, Empty
 from threading import Thread, Event
 
 
 class Task:
+    """
+    Generic task to be solved by a TaskRunner.
+    """
 
     def __init__(self) -> None:
         self._is_done_event = Event()
@@ -14,7 +22,7 @@ class Task:
 
     def get_result(self):
         return self._result
-    
+
     def _done(self):
         self._is_done_event.set()
 
@@ -31,10 +39,14 @@ class Task:
 
 
 class ThreadPool:
+    """
+    TaskRunner spawner and Tasks container.
+    """
+
     def __init__(self):
         self._tasks_queue: Queue = Queue()
         self._terminate_event = Event()
-        self._workers: list[TaskRunner] = []
+        self._workers = []
 
         self._start_workers()
 
@@ -56,7 +68,7 @@ class ThreadPool:
 
     def _pop_task(self) -> Task:
         return self._tasks_queue.get(block=False)
-    
+
     def tasks_left(self) -> int:
         return self._tasks_queue.qsize()
 
@@ -71,11 +83,14 @@ class ThreadPool:
 
         # Should we really join them here? They terminate once no more
         # tasks are left anyway, which can be queried by users.
-        for worker in self._workers: 
+        for worker in self._workers:
             worker.join()
 
 
 class TaskRunner(Thread):
+    """
+    Worker that continuously solves tasks from its parent ThreadPool.
+    """
 
     def __init__(self, threadpool: ThreadPool):
         Thread.__init__(self)

@@ -1,3 +1,8 @@
+"""
+Centralizes all strings for the logging.
+"""
+
+
 LOGGER_SHUTTING_DOWN = "Shutting down!"
 LOGGER_NONEXISTENT_QUERY_ERROR = "Attempted to get results on nonexistent query."
 LOGGER_REQUEST_MISSING_FIELD = "The request is missing field '%s'."

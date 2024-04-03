@@ -10,10 +10,9 @@ class ThreadPoolTest(unittest.TestCase):
         def __init__(self) -> None:
             super().__init__()
             self.event = Event()
-        
+
         def run(self):
             self.event.set()
-            self._result
             return 5
 
     def setUp(self) -> None:
@@ -26,7 +25,7 @@ class ThreadPoolTest(unittest.TestCase):
         example_task = ThreadPoolTest.ExampleTask()
 
         self.thread_pool.push_task(example_task)
-        
+
         timeout_time = 5
         interval_time = 0.05
         for i in range(0, int(timeout_time//interval_time)):

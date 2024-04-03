@@ -1,11 +1,9 @@
 import unittest
 import time
-from threading import Event
-from app.query_handler import QueryHandler, ThreadPool, DataIngestor, Task, NonexistentQueryException
+from app.query_handler import QueryHandler, ThreadPool, DataIngestor, NonexistentQueryException
 
 
 class QueryHandlerTest(unittest.TestCase):
-
 
     def setUp(self) -> None:
         threadpool = ThreadPool()
