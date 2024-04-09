@@ -14,10 +14,6 @@
   <p align="center">
     First ASC Homework - API for sports stats.
     <br />
-    <br />
-    <a href="https://github.com/miron-boiangiu/asc_tema_api/issues">Report Bug</a>
-    ·
-    <a href="https://github.com/miron-boiangiu/asc_tema_api/issues">Request Feature</a>
   </p>
 </div>
 

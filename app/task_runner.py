@@ -5,7 +5,7 @@ Generic ThreadPool for solving tasks.
 
 import os
 from queue import Queue, Empty
-from threading import Thread, Event
+from threading import Thread, Event, Lock
 
 
 class Task:
@@ -47,7 +47,8 @@ class ThreadPool:
         self._tasks_queue: Queue = Queue()
         self._terminate_event = Event()
         self._workers = []
-
+        self._wakeup_workers = Event()
+        self._queue_mutex = Lock()  # Necessary because we do multiple things in push() and pop()
         self._start_workers()
 
     def _start_workers(self):
@@ -59,15 +60,21 @@ class ThreadPool:
             number_of_threads = os.cpu_count()
 
         for worker_no in range(0, number_of_threads):
-            new_worker = TaskRunner(self)
+            new_worker = TaskRunner(self, self._wakeup_workers)
             self._workers.append(new_worker)
             new_worker.start()
 
     def push_task(self, task: Task) -> None:
-        self._tasks_queue.put(task)
+        with self._queue_mutex:
+            self._tasks_queue.put(task)
+            self._wakeup_workers.set()
 
     def _pop_task(self) -> Task:
-        return self._tasks_queue.get(block=False)
+        with self._queue_mutex:
+            task = self._tasks_queue.get(block=False)
+            if self._tasks_queue.qsize() == 0:
+                self._wakeup_workers.clear()
+            return task
 
     def tasks_left(self) -> int:
         return self._tasks_queue.qsize()
@@ -92,12 +99,15 @@ class TaskRunner(Thread):
     Worker that continuously solves tasks from its parent ThreadPool.
     """
 
-    def __init__(self, threadpool: ThreadPool):
+    def __init__(self, threadpool: ThreadPool, wakeup_event: Event):
         Thread.__init__(self)
         self._threadpool: ThreadPool = threadpool
+        self._wakeup_event = wakeup_event
 
     def run(self):
         while True:
+
+            self._wakeup_event.wait()
             try:
                 task_to_run = self._threadpool._pop_task()
                 task_to_run.start()
