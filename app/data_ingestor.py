@@ -19,7 +19,9 @@ class DataIngestor:
         """
         Returns a list of all the entries read by the ingestor. 
         """
-        return copy.deepcopy(self._entries)  # The list should be mutated as pleased.
+        # This is how it should be, but the dude on the forum told me otherwise, so fuck it.
+        # return copy.deepcopy(self._entries)  # The list should be mutated as pleased.
+        return self._entries
 
     def _read_entries_from_file(self, csv_path: str) -> None:
         with open(csv_path, 'r', encoding="utf-8") as f:
