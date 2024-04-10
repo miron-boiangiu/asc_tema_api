@@ -48,7 +48,7 @@ class ThreadPool:
         self._terminate_event = Event()
         self._workers = []
         self._wakeup_workers = Event()
-        self._queue_mutex = Lock()  # Necessary because we do multiple things in push() and pop()
+        self._safety_mutex = Lock()  # Necessary because we do multiple things in push() and pop()
         self._start_workers()
 
     def _start_workers(self):
@@ -65,14 +65,14 @@ class ThreadPool:
             new_worker.start()
 
     def push_task(self, task: Task) -> None:
-        with self._queue_mutex:
+        with self._safety_mutex:
             self._tasks_queue.put(task)
             self._wakeup_workers.set()
 
     def _pop_task(self) -> Task:
-        with self._queue_mutex:
+        with self._safety_mutex:
             task = self._tasks_queue.get(block=False)
-            if self._tasks_queue.qsize() == 0:
+            if self._tasks_queue.qsize() == 0 and not self._terminate_event.is_set():
                 self._wakeup_workers.clear()
             return task
 
@@ -86,7 +86,9 @@ class ThreadPool:
         """
         Finishes given tasks and terminates.
         """
-        self._terminate_event.set()
+        with self._safety_mutex:
+            self._terminate_event.set()
+            self._wakeup_workers.set()
 
         # Should we really join them here? They terminate once no more
         # tasks are left anyway, which can be queried by users.
